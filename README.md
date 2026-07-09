@@ -31,4 +31,4 @@ for a 32-bit adder
     Bit 16-31: exact
 
 **My Progress**
-Right now I have done finding the error metrics for A1-A4 for 1 bit number additions
+Right now I have done till the nbit error metrics calculation for a1 to a4 cases
