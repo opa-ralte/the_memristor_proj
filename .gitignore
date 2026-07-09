@@ -1,0 +1,26 @@
+*.asv   # autosave files
+*.mex*   # binary files
+*.mat~  # backup MAT-files
+*.m~    # backup M-files
+.matlab/    # local desktop config folders
+
+slprj/
+*_ert_rtw/
+*_grt_rtw/
+sfprj/
+*.slx.original
+*.mdl.original
+
+# other compiled binaries  
+*.mexglx
+*.mexa64
+*.mexmaci
+*.mexmaci64
+*.mexmac
+*.mexw32
+*.mexw64
+
+# toolchain and app building artifacts  
+DerivedData/
+_repro/
+mlintrpt.html
