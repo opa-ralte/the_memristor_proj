@@ -21,8 +21,8 @@ figure('Name', 'Input Images');
 subplot(1,2,1); imshow(img1); title('image A aw');
 subplot(1,2,2); imshow(img2); title('image B aw')
 
-algos = [1 2 3 4];
-algoNames = {'A1 (Sum=Cout'')', 'A2 (Sum=Cout)','A3 (ignores Cin)', 'A4 (AB+BC, Sum=Cout'')'};
+algos = [1 2 3 4 5];
+algoNames = {'A1 (Sum=Cout'')', 'A2 (Sum=Cout)','A3 (ignores Cin)', 'A4 (AB+BC, Sum=Cout'')', 'A5 (Hybrid: approx low 4b, exact high 4b)'};
 
 % tunah image addition - now we begin image addition
 exactAdd = imadd(img1, img2);   % tah hi chuan matlab-in a chhawm sa image addition kan hmanga, exact result atan kan la a ni e
@@ -109,6 +109,14 @@ function [S, Cout] = approxAdderImage(A, B, algo, Cin0)
             case 4
                 c = (a & b) | (b & Cin);
                 s = ~c;
+            case 5
+                if bitpos <= 4
+                    c = maj;
+                    s = ~c;
+                else
+                    c = maj;
+                    s = xor(xor(a, b), Cin);
+                end
             otherwise
                 error('Algo number a dik lo... %d', algo);
         end
