@@ -1,34 +1,73 @@
-# the_memristor_proj
-Development of matlab environment for approximated computing using memristive-based majority gate.  
+# The Memristor Project
 
-**Objectives:**  
-1. To create a working environment on MATLAB for the following:  
-    a. To find the error metrics for Algorithms 1, 2, 3, and 4 for 1-bit, 2-bit, 8-bit, 16-bit, and 32-bit RCA  
-    b. To perform image processing (Addition, Subtraction, grey-scale filter) using Algorithms 1, 2, 3, and 4  
-    c. To find the PSNR, SSIM and MSSIM for the above  
-2. To compare results with existing SOA  
+A MATLAB environment for **approximate computing using memristive-based majority (MAJ) gates**. The project builds and evaluates several MAJ-gate approximate adder designs, then applies them to real image processing tasks to see how the approximation trades off accuracy for efficiency.
 
-**Algorithms/Approximations to use**  
-Algorithm:  
-1-bit adder is realized using MAJORITY gate and approximated as:  
-A1: Cout = MAJ(A,B,C) and Sum = Cout'  
-A2: Cout = MAJ(A,B,C) and Sum = Cout  
-A3: Cout = AB and Sum = A XOR B  
-A4: Cout = AB+BC and Sum = Cout’  
+## Overview
 
-**Note**  
-While processing the image, use a hybrid adder: use the approximated value for lower k bits and the  
-exact MAJ-based full adder for the higher bits.  
-Example:  
-for an 8-bit adder  
-    Bit 0-3: approximate  
-    Bit 4-7: exact
-for a 16-bit adder  
-    Bit 0-7: approximate  
-    Bit 8-15: exact  
-for a 32-bit adder
-    Bit 0-15: approximate
-    Bit 16-31: exact
+A memristor-based 1-bit full adder can be realized using a majority (MAJ) gate. This project implements four such realizations — exact and approximate — and studies their behavior at the bit level (ripple-carry adders of varying width) and at the application level (image arithmetic).
 
-**My Progress**
-Right now I have done till the nbit error metrics calculation for a1 to a4 cases
+## Algorithms
+
+The 1-bit adder is built around `MAJ(A, B, C)`, with four variants:
+
+| Algorithm | Carry-out | Sum |
+|-----------|-----------|-----|
+| **A1** | `MAJ(A, B, C)` | `Cout'` |
+| **A2** | `MAJ(A, B, C)` | `Cout` |
+| **A3** | `AB` | `A XOR B` |
+| **A4** | `AB + BC` | `Cout'` |
+
+## Objectives
+
+1. Build a working MATLAB environment to:
+   - Compute error metrics (MAE, MSE, PSNR) for A1–A4 across 1-bit, 2-bit, 8-bit, 16-bit, and 32-bit ripple-carry adders (RCA).
+   - Perform image processing operations (addition, subtraction, greyscale filtering) using A1–A4.
+   - Compute PSNR, SSIM, and MSSIM for the resulting images.
+2. Compare results against existing state-of-the-art approximate adder designs.
+
+## Hybrid Adder Design
+
+For image processing, a **hybrid adder** is used: lower-order bits use the approximate MAJ-based adder, while higher-order bits use the exact MAJ-based full adder — preserving precision where it matters most (MSBs) while saving cost on the LSBs.
+
+| Adder width | Approximate bits | Exact bits |
+|-------------|------------------|------------|
+| 8-bit  | 0–3  | 4–7   |
+| 16-bit | 0–7  | 8–15  |
+| 32-bit | 0–15 | 16–31 |
+
+## Repository Structure
+
+```
+the_memristor_proj/
+├── src/                     # MATLAB source (adder implementations, error metrics, image pipeline)
+├── scripts/                 # Run/analysis scripts
+├── docs/                    # the docs (deuh tawp)
+├── resources/project/       # Project resources and supporting files
+├── TheMemristorProject.prj  # MATLAB project file
+├── .gitattributes
+└── .gitignore
+```
+
+## Getting Started
+
+### Requirements
+- MATLAB (Image Processing Toolbox recommended for PSNR/SSIM/MSSIM computations)
+
+### Usage
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/opa-ralte/the_memristor_proj.git
+   ```
+2. Open `TheMemristorProject.prj` in MATLAB to load the project environment.
+3. Run the scripts in `scripts/` to reproduce the n-bit error metric analysis or the image processing pipeline.
+
+## Progress
+
+- [x] N-bit error metric calculation for A1–A4 (1-bit through 32-bit RCA)
+- [x] Hybrid adder image processing pipeline (addition, subtraction, greyscale)
+- [x] PSNR / SSIM / MSSIM evaluation on processed images
+- [ ] Comparison against existing state-of-the-art approximate adders
+
+## License
+
+No license specified yet.
