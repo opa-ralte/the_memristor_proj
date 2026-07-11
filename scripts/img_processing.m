@@ -35,7 +35,8 @@ for k = 1:numel(algos)
     algo = algos(k);
     approx = approxAddImage(img1, img2, algo, true);
     [mse_val, psnr_val]  = imageError(exactAdd, approx);
-    fprintf('%-22s MSE = %8.3f  PSNR = %6.2f dB\n', algoNames{k}, mse_val, psnr_val);
+    mssim_val = ssim(exactAdd, approx);
+    fprintf('%-22s MSE = %8.3f  PSNR = %6.2f dB MSSIM = %6.2f dB\n', algoNames{k}, mse_val, psnr_val, mssim_val);
 
     subplot(2,3,k+1); imshow(approx);
     title(sprintf('%s\nPSNR=%.2fdB', algoNames{k}, psnr_val));
@@ -51,8 +52,8 @@ fprintf('\n results of subtraction\n');
 for k = 1:numel(algos)
     algo = algos(k);
     approx = approxSubImage(img1, img2, algo, true);
-    [mse_val, psnr_val] = imageError(exactSub, approx);
-    fprintf('%-22s  MSE = %8.3f   PSNR = %6.2f dB\n', algoNames{k}, mse_val, psnr_val);
+    mssim_val = ssim(exactAdd, approx);
+    fprintf('%-22s MSE = %8.3f  PSNR = %6.2f dB MSSIM = %6.2f dB\n', algoNames{k}, mse_val, psnr_val, mssim_val);
 
     subplot(2,3,k+1); imshow(approx);
     title(sprintf('%s\nPSNR=%.2fdB', algoNames{k}, psnr_val));
@@ -69,8 +70,8 @@ fprintf('\n results of greyscale\n');
 for k = 1:numel(algos)
     algo = algos(k);
     approx = approxGreyscale(rgbImg, algo);
-    [mse_val, psnr_val] = imageError(exactGray, approx);
-    fprintf('%-22s  MSE = %8.3f   PSNR = %6.2f dB\n', algoNames{k}, mse_val, psnr_val);
+    mssim_val = ssim(exactAdd, approx);
+    fprintf('%-22s MSE = %8.3f  PSNR = %6.2f dB MSSIM = %6.2f dB\n', algoNames{k}, mse_val, psnr_val, mssim_val);
 
     subplot(2,3,k+1); imshow(approx);
     title(sprintf('%s\nPSNR=%.2fdB', algoNames{k}, psnr_val));
