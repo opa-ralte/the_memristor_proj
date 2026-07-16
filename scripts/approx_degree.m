@@ -44,9 +44,9 @@
 clear; clc;
 
 
-n = 32;     % number-a bit awm zat
-N = 1000000;    % test nan, kan iterate zat tur
-ks = 2:2:n;      % 2, 4, 6, 8, ..., 32
+n = 32;     % number-a bit awm zat, 16 ah te, 8 ah te a thlak theih
+N = 1000000;    % test nan, kan iterate zat tur, hei pawh a thlak theih
+ks = 2:2:n;      % 2, 4, 6, 8, ..., 32, hei pawh a thlak theih
 
 A = randi([0, 2^n-1], N, 1);       % array of 1000000 randomly generated 32-bit binary numbers
 B = randi([0, 2^n-1], N, 1);        % same 👆
@@ -55,14 +55,14 @@ exactSum = mod(A + B, 2^n);
 exactDiff = mod(A - B, 2^n);
 
 for k = ks
-    approxSum = approxAdd(A, B, 0, k, n);
+    [approxSum, steps] = approxAdd(A, B, 0, k, n);
     approxDiff = approxAdd(A, (2^n-1) - B, 1, k, n); % using two's complement
 
     [ER1, MED1, NMED1, MSE1, WCE1] = errMetrics(exactSum, approxSum, n);
     [ER2, MED2, NMED2, MSE2, WCE2] = errMetrics(exactDiff, approxDiff, n);
 
-    fprintf('k=%2d | ADD: ER=%.4f MED=%.2f NMED=%.5f MSE=%.2e WCE=%d | SUB: ER=%.4f MED=%.2f NMED=%.5f MSE=%.2e WCE=%d\n', ...
-        k, ER1, MED1, NMED1, MSE1, WCE1, ER2, MED2, NMED2, MSE2, WCE2);
+    fprintf('k=%2d | steps=%d | ADD: ER=%.4f MED=%.2f NMED=%.5f MSE=%.2e WCE=%d | SUB: ER=%.4f MED=%.2f NMED=%.5f MSE=%.2e WCE=%d\n', ...
+        k, steps, ER1, MED1, NMED1, MSE1, WCE1, ER2, MED2, NMED2, MSE2, WCE2);
 end
 
 
@@ -70,10 +70,13 @@ end
 
 %% functions
 
-function S = approxAdd(A, B, cin, k, n)
+function [S, steps] = approxAdd(A, B, cin, k, n)
     approxBits = n-k;
     carry = cin * ones(size(A));
     S = zeros(size(A));
+    carryStep = zeros(1, n);    % new step where cout_i is ready
+    sumStep = zeros(1, n);
+    prevCarryStep = 0;
     for i = 0:n-1
         a = bitget(A, i+1);
         b = bitget(B, i+1);
@@ -85,7 +88,12 @@ function S = approxAdd(A, B, cin, k, n)
         end
         S = S + s * 2^i;
         carry = cout;
+
+        carryStep(i+1) = prevCarryStep + 1;
+        sumStep(i+1) = carryStep(i+1) + 1;
+        prevCarryStep = carryStep(i+1);
     end
+    steps = max(sumStep);
 end
 
 function [ER,MED,NMED,MSE,WCE] = errMetrics(exact, approx, n)
