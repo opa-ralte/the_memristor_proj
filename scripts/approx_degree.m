@@ -44,9 +44,9 @@
 clear; clc;
 
 
-n = 32;     % number-a bit awm zat, 16 ah te, 8 ah te a thlak theih
-N = 1000000;    % test nan, kan iterate zat tur, hei pawh a thlak theih
-ks = 2:2:n;      % 2, 4, 6, 8, ..., 32, hei pawh a thlak theih
+n = 4;     % number-a bit awm zat, 16 ah te, 8 ah te a thlak theih
+N = 100;    % test nan, kan iterate zat tur, hei pawh a thlak theih
+ks = 1:1:n;      % 2, 4, 6, 8, ..., 32, hei pawh a thlak theih
 
 A = randi([0, 2^n-1], N, 1);       % array of 1000000 randomly generated 32-bit binary numbers
 B = randi([0, 2^n-1], N, 1);        % same 👆
@@ -55,8 +55,8 @@ exactSum = mod(A + B, 2^n);
 exactDiff = mod(A - B, 2^n);
 
 for k = ks
-    [approxSum, steps] = approxAdd(A, B, 0, k, n);
-    approxDiff = approxAdd(A, (2^n-1) - B, 1, k, n); % using two's complement
+    [approxSum, steps] = approxAdd(A, B, 0, k, n, 'A5');
+    approxDiff = approxAdd(A, (2^n-1) - B, 1, k, n, 'A5'); % using two's complement
 
     [ER1, MED1, NMED1, MSE1, WCE1] = errMetrics(exactSum, approxSum, n);
     [ER2, MED2, NMED2, MSE2, WCE2] = errMetrics(exactDiff, approxDiff, n);
@@ -70,30 +70,72 @@ end
 
 %% functions
 
-function [S, steps] = approxAdd(A, B, cin, k, n)
-    approxBits = n-k;
+function [S, steps] = approxAdd(A, B, cin, k, n, arch)
+    approxBits = n - k;
     carry = cin * ones(size(A));
     S = zeros(size(A));
-    carryStep = zeros(1, n);    % new step where cout_i is ready
-    sumStep = zeros(1, n);
-    prevCarryStep = 0;
+
     for i = 0:n-1
         a = bitget(A, i+1);
         b = bitget(B, i+1);
-        cout = (a & b) | (carry & (a | b));
+
         if i < approxBits
-            s = ~cout & 1;
+            switch arch
+                case 'A1'
+                    cout = (a & b) | (carry & (a | b));
+                    s = ~cout & 1;
+                case 'A2'
+                    cout = (a & b) | (carry & (a | b));
+                    s = cout;
+                case 'A3'
+                    cout = a & b;
+                    s = xor(a, b);
+                case 'A4'
+                    cout = (a & b) | (b & carry);
+                    s = ~cout & 1;
+                case 'A5'
+                    cout = (a & b) | (carry & (a | b));
+                    s = xor(a, b);
+                case 'A6'
+                    cout = a | b;
+                    s = xor(a, b);
+                case 'A7'
+                    cout = (a & b) | (carry & (a | b));
+                    s = carry;
+                case 'A8'
+                    cout = (a & carry) | b;
+                    s = ~cout & 1;
+                case 'A9'
+                    cout = (b & carry) | a;
+                    s = ~cout & 1;
+                case 'A10'
+                    cout = b;                 % MAJ(B,0,1) = B
+                    s = ~b & 1;                % Sum = B'
+                otherwise
+                    error('Unknown architecture: %s', arch);
+            end
         else
+            % exact stage (same for all architectures)
+            cout = (a & b) | (carry & (a | b));
             s = xor(xor(a, b), carry);
         end
+
         S = S + s * 2^i;
         carry = cout;
-
-        carryStep(i+1) = prevCarryStep + 1;
-        sumStep(i+1) = carryStep(i+1) + 1;
-        prevCarryStep = carryStep(i+1);
     end
-    steps = max(sumStep);
+
+    switch arch
+            case 'A1',  steps = 8*n - 3*k;
+            case 'A2',  steps = 8*n - 5*k - (n==k);
+            case 'A3',  steps = 8*n + 2*k + (n>k);
+            case 'A4',  steps = 8*n + 3*k;
+            case 'A5',  steps = 8*n + 3*k - (n==k);
+            case 'A6',  steps = 8*n + 2*k + (n>k);
+            case 'A7',  steps = 8*n + 6*k + (n>k);
+            case 'A8',  steps = 8*n;
+            case 'A9',  steps = 8*n;
+            case 'A10', steps = 8*n - 6*k + (n>k);
+    end
 end
 
 function [ER,MED,NMED,MSE,WCE] = errMetrics(exact, approx, n)
